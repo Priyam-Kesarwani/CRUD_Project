@@ -25,16 +25,25 @@ exports.AppModule = AppModule = __decorate([
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
-                useFactory: (configService) => ({
-                    type: 'postgres',
-                    host: configService.get('DB_HOST', 'localhost'),
-                    port: parseInt(configService.get('DB_PORT', '5432'), 10),
-                    username: configService.get('DB_USERNAME', 'postgres'),
-                    password: configService.get('DB_PASSWORD', 'postgres'),
-                    database: configService.get('DB_NAME', 'nest_auth'),
-                    entities: [user_entity_1.User],
-                    synchronize: configService.get('DB_SYNC', 'true') === 'true',
-                }),
+                useFactory: (configService) => {
+                    const databaseUrl = configService.get('DATABASE_URL');
+                    const sslEnabled = configService.get('DB_SSL', 'false') === 'true';
+                    return {
+                        type: 'postgres',
+                        ...(databaseUrl
+                            ? { url: databaseUrl }
+                            : {
+                                host: configService.get('DB_HOST', 'localhost'),
+                                port: parseInt(configService.get('DB_PORT', '5432'), 10),
+                                username: configService.get('DB_USERNAME', 'postgres'),
+                                password: configService.get('DB_PASSWORD', 'postgres'),
+                                database: configService.get('DB_NAME', 'nest_auth'),
+                            }),
+                        entities: [user_entity_1.User],
+                        synchronize: configService.get('DB_SYNC', 'true') === 'true',
+                        ssl: sslEnabled ? { rejectUnauthorized: false } : false,
+                    };
+                },
             }),
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
