@@ -4,7 +4,7 @@ CREATE DATABASE nest_auth;
 -- Reference schema:
 --
 -- CREATE TABLE users (
---   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--   id SERIAL PRIMARY KEY,
 --   email VARCHAR NOT NULL UNIQUE,
 --   name VARCHAR NOT NULL,
 --   password_hash VARCHAR NOT NULL,

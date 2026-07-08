@@ -5,6 +5,7 @@ import { SignupDto } from './dto/signup.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 export type AuthUser = {
     id: string;
+    userCode: string | null;
     email: string;
     name: string;
 };
@@ -23,6 +24,9 @@ export declare class AuthService {
     getProfile(userId: string): Promise<AuthUser>;
     updateProfile(userId: string, dto: UpdateProfileDto): Promise<AuthUser>;
     deleteProfile(userId: string): Promise<void>;
+    getStats(): Promise<{
+        totalUsers: number;
+    }>;
     private buildAuthResponse;
     private toAuthUser;
 }

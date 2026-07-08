@@ -51,4 +51,10 @@ export class AuthController {
   deleteProfile(@Req() req: AuthenticatedRequest) {
     return this.authService.deleteProfile(req.user.id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('stats')
+  getStats() {
+    return this.authService.getStats();
+  }
 }

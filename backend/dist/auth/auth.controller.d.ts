@@ -20,5 +20,8 @@ export declare class AuthController {
     me(req: AuthenticatedRequest): Express.User & AuthUser;
     updateProfile(req: AuthenticatedRequest, dto: UpdateProfileDto): Promise<AuthUser>;
     deleteProfile(req: AuthenticatedRequest): Promise<void>;
+    getStats(): Promise<{
+        totalUsers: number;
+    }>;
 }
 export {};

@@ -12,6 +12,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 
 export type AuthUser = {
   id: string;
+  userCode: string | null;
   email: string;
   name: string;
 };
@@ -101,7 +102,17 @@ export class AuthService {
     await this.usersService.remove(userId);
   }
 
-  private buildAuthResponse(user: { id: string; email: string; name: string }) {
+  async getStats(): Promise<{ totalUsers: number }> {
+    const totalUsers = await this.usersService.count();
+    return { totalUsers };
+  }
+
+  private buildAuthResponse(user: {
+    id: string;
+    userCode: string | null;
+    email: string;
+    name: string;
+  }) {
     const authUser = this.toAuthUser(user);
     const accessToken = this.jwtService.sign({
       sub: authUser.id,
@@ -113,11 +124,13 @@ export class AuthService {
 
   private toAuthUser(user: {
     id: string;
+    userCode: string | null;
     email: string;
     name: string;
   }): AuthUser {
     return {
       id: user.id,
+      userCode: user.userCode,
       email: user.email,
       name: user.name,
     };

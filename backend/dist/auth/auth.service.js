@@ -107,6 +107,10 @@ let AuthService = class AuthService {
         }
         await this.usersService.remove(userId);
     }
+    async getStats() {
+        const totalUsers = await this.usersService.count();
+        return { totalUsers };
+    }
     buildAuthResponse(user) {
         const authUser = this.toAuthUser(user);
         const accessToken = this.jwtService.sign({
@@ -118,6 +122,7 @@ let AuthService = class AuthService {
     toAuthUser(user) {
         return {
             id: user.id,
+            userCode: user.userCode,
             email: user.email,
             name: user.name,
         };

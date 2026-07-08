@@ -17,10 +17,16 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("./user.entity");
+function generateUserCode() {
+    return 'USR-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+}
 let UsersService = class UsersService {
     usersRepository;
     constructor(usersRepository) {
         this.usersRepository = usersRepository;
+    }
+    async onModuleInit() {
+        await this.backfillMissingUserCodes();
     }
     findByEmail(email) {
         return this.usersRepository.findOne({ where: { email } });
@@ -28,8 +34,14 @@ let UsersService = class UsersService {
     findById(id) {
         return this.usersRepository.findOne({ where: { id } });
     }
-    create(email, name, passwordHash) {
-        const user = this.usersRepository.create({ email, name, passwordHash });
+    async create(email, name, passwordHash) {
+        const userCode = await this.generateUniqueUserCode();
+        const user = this.usersRepository.create({
+            userCode,
+            email,
+            name,
+            passwordHash,
+        });
         return this.usersRepository.save(user);
     }
     async update(id, data) {
@@ -38,6 +50,34 @@ let UsersService = class UsersService {
     }
     async remove(id) {
         await this.usersRepository.delete(id);
+    }
+    async count() {
+        return this.usersRepository.count();
+    }
+    async generateUniqueUserCode() {
+        let userCode = generateUserCode();
+        let attempts = 0;
+        while (attempts < 5) {
+            const existingUser = await this.usersRepository.findOne({
+                where: { userCode },
+            });
+            if (!existingUser) {
+                return userCode;
+            }
+            userCode = generateUserCode();
+            attempts += 1;
+        }
+        throw new Error('Unable to generate a unique userCode');
+    }
+    async backfillMissingUserCodes() {
+        const usersWithoutCode = await this.usersRepository
+            .createQueryBuilder('user')
+            .where('user.userCode IS NULL')
+            .getMany();
+        for (const user of usersWithoutCode) {
+            const userCode = await this.generateUniqueUserCode();
+            await this.usersRepository.update(user.id, { userCode });
+        }
     }
 };
 exports.UsersService = UsersService;

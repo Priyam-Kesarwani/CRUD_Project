@@ -91,3 +91,17 @@ export async function deleteProfile(token: string): Promise<void> {
     throw new Error(data?.message ?? "Failed to delete profile");
   }
 }
+
+export async function getStats(token: string): Promise<{ totalUsers: number }> {
+  const response = await fetch(`${API_URL}/auth/stats`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message ?? "Failed to fetch statistics");
+  }
+
+  return data;
+}
